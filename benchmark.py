@@ -85,11 +85,15 @@ def gen_model_zoo(device: torch.device, image_size: int) -> Dict[str, nn.Module]
             attention_head_dim=8,
         ).to(device).eval()
 
+        # Smaller UNet2D (unconditional) to fit <8GB: fewer blocks and channels, no attention blocks
         unet_uncond = UNet2DModel(
-            sample_size=image_size, in_channels=3, out_channels=3, layers_per_block=2,
-            block_out_channels=(64, 128, 128, 256),
-            down_block_types=("DownBlock2D", "DownBlock2D", "AttnDownBlock2D", "DownBlock2D"),
-            up_block_types=("UpBlock2D", "AttnUpBlock2D", "UpBlock2D", "UpBlock2D"),
+            sample_size=image_size,
+            in_channels=3,
+            out_channels=3,
+            layers_per_block=1,
+            block_out_channels=(32, 64, 128),
+            down_block_types=("DownBlock2D", "DownBlock2D", "DownBlock2D"),
+            up_block_types=("UpBlock2D", "UpBlock2D", "UpBlock2D"),
         ).to(device).eval()
 
         vae = AutoencoderKL(
@@ -121,46 +125,46 @@ def text_model_zoo(device: torch.device) -> Dict[str, nn.Module]:
 
     zoo: Dict[str, nn.Module] = {}
 
-    # Small BERT-like encoder
+    # Moderate BERT-like encoder (fits <8GB with default settings)
     bert_cfg = BertConfig(
         vocab_size=30522,
-        hidden_size=256,
-        num_hidden_layers=4,
-        num_attention_heads=4,
-        intermediate_size=1024,
+        hidden_size=384,
+        num_hidden_layers=8,
+        num_attention_heads=6,
+        intermediate_size=1536,
     )
-    zoo["bert_tiny"] = BertModel(bert_cfg).to(device).eval()
+    zoo["bert_small"] = BertModel(bert_cfg).to(device).eval()
 
     # DistilBERT-like
     distil_cfg = DistilBertConfig(
         vocab_size=30522,
-        dim=256,
-        hidden_dim=1024,
-        n_layers=4,
-        n_heads=4,
+        dim=384,
+        hidden_dim=1536,
+        n_layers=8,
+        n_heads=6,
     )
-    zoo["distilbert_tiny"] = DistilBertModel(distil_cfg).to(device).eval()
+    zoo["distilbert_small"] = DistilBertModel(distil_cfg).to(device).eval()
 
     # RoBERTa-like encoder
     roberta_cfg = RobertaConfig(
         vocab_size=50265,
-        hidden_size=256,
-        num_hidden_layers=4,
-        num_attention_heads=4,
-        intermediate_size=1024,
+        hidden_size=384,
+        num_hidden_layers=8,
+        num_attention_heads=6,
+        intermediate_size=1536,
     )
-    zoo["roberta_tiny"] = RobertaModel(roberta_cfg).to(device).eval()
+    zoo["roberta_small"] = RobertaModel(roberta_cfg).to(device).eval()
 
     # Small GPT-2-like decoder LM
     gpt2_cfg = GPT2Config(
         vocab_size=50257,
-        n_layer=4,
-        n_head=4,
-        n_embd=256,
+        n_layer=8,
+        n_head=6,
+        n_embd=384,
         n_positions=512,
         n_ctx=512,
     )
-    zoo["gpt2_tiny"] = GPT2LMHeadModel(gpt2_cfg).to(device).eval()
+    zoo["gpt2_small"] = GPT2LMHeadModel(gpt2_cfg).to(device).eval()
 
     return zoo
 
@@ -292,7 +296,10 @@ def main():
                 channels_last=args.channels_last,
             )
             all_results.append(res)
-            print(f"{name}: mean {res['latency_ms_mean']:.3f} ms, throughput {res['throughput_img_s']:.2f} img/s")
+            # Support different throughput metrics depending on family
+            throughput = res.get('throughput_img_s', res.get('throughput_tok_s', float('nan')))
+            unit = 'img/s' if 'throughput_img_s' in res else ('tok/s' if 'throughput_tok_s' in res else 'units/s')
+            print(f"{name}: mean {res['latency_ms_mean']:.3f} ms, throughput {throughput:.2f} {unit}")
         except RuntimeError as e:
             print(f"Error benchmarking {name}: {e}")
 

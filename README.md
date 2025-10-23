@@ -1,123 +1,128 @@
 # GPU Deep Learning Benchmark
 
-This repository provides a simple, reproducible CUDA GPU benchmark using 5 representative, up-to-date torchvision models and random input tensors. It measures forward-pass latency and throughput, averages results across multiple runs, and writes a standardized Markdown report.
+This repository provides a simple, reproducible CUDA GPU benchmark that covers:
+- Vision/classification (torchvision)
+- Vision/generation (diffusers)
+- NLP/language (transformers)
 
-## Models
+It measures forward-pass latency and throughput and writes a standardized Markdown report under `./benchmark_results`.
 
-By default, the benchmark runs the following 5 models (all accept 3x224x224 inputs):
-- `resnet50`
-- `efficientnet_v2_s`
-- `convnext_tiny`
-- `swin_v2_t`
-- `vit_b_16`
+## Environment setup (two options)
 
-You can choose a subset via `--models`.
+You can either build a project-local Conda environment at `./envs/gpu-test` or use a prebuilt environment by downloading and extracting it.
 
-## Requirements
+### Option A: Build Conda env at ./envs/gpu-test
 
-- Python 3.9+
-- PyTorch and torchvision with CUDA support (CUDA-only)
-
-Install from `requirements.txt`:
+1) Create a clean Conda environment (Python only), then install project requirements via pip:
 
 ```
+conda create -p ./envs/gpu-test python=3.12 -y
+conda activate ./envs/gpu-test
 pip install -r requirements.txt
 ```
 
-Note: If you need a specific CUDA build for PyTorch/torchvision, please follow the official installation instructions: https://pytorch.org/get-started/locally/
-
-## Quick start (Conda, CUDA-only)
-
-The project includes a ready-to-use Conda environment file `environment.yml` so you can set up and run in an isolated env quickly.
-
-1) Create the environment (includes PyTorch, torchvision, and CUDA 12.1 runtime):
+2) (When you want to run the benchmark after installation) Activate the environment:
 
 ```
-conda env create -f environment.yml
+conda activate ./envs/gpu-test
 ```
 
-2) Activate it:
-
-```
-conda activate gpu-bench
-```
-
-3) Verify CUDA availability (optional):
+3) (optional) Verify CUDA :
 
 ```
 python -c "import torch; print('cuda_available=', torch.cuda.is_available()); print('torch=', torch.__version__)"
 ```
 
-If you prefer not to activate, you can run with:
+4) Run the benchmark:
 
 ```
-conda run -n gpu-bench python benchmark.py --batch-size 32
+python benchmark.py
+```
+
+If you prefer not to activate the env, you can run with:
+
+```
+conda run -p ./envs/gpu-test python benchmark.py
+```
+
+Remove the local env when done:
+
+```
+conda env remove -p ./envs/gpu-test
+```
+
+### Option B: Use a prebuilt environment (download & extract)
+
+If your team provides a prebuilt Conda env archive (e.g., `gpu-test-conda-env.tar.gz`), you can avoid solving dependencies.
+
+1) Download the archive to the project root (replace <URL> with your internal/release link):
+
+```
+wget -O gpu-test-conda-env.tar.gz <URL-to-prebuilt-conda-env>
+```
+
+2) Extract to `./envs/gpu-test`:
+
+```
+mkdir -p ./envs
+tar -xzf gpu-test-conda-env.tar.gz -C ./envs
+# After extraction, you should have: ./envs/gpu-test
+```
+
+3) Activate and run:
+
+```
+conda activate ./envs/gpu-test
+python benchmark.py
+```
+
+Or run without activation:
+
+```
+conda run -p ./envs/gpu-test python benchmark.py
 ```
 
 Note: This benchmark requires CUDA; CPU execution is not supported in the current version.
 
-### Use a project-local Conda environment (inside this folder)
+## Models included by default
 
-如果你希望把 Conda 环境创建在项目文件夹内（方便“一文件夹即可跑/复制”），可以使用前缀路径方式：
+Vision/classification (3x224x224 inputs):
+- `resnet50`, `efficientnet_v2_s`, `convnext_tiny`, `swin_v2_t`, `vit_b_16`
 
-1) 基于 environment.yml 在本目录创建环境（路径为 ./env）
+Vision/generation (diffusers):
+- `gen_unet2d_condition` (conditional UNet, latent space)
+- `gen_unet2d` (smaller unconditional UNet)
+- `gen_vae_autoencoderkl` (VAE)
 
-```
-conda env create -p ./env -f environment.yml
-```
-
-2) 激活该本地环境：
-
-```
-conda activate ./env
-```
-
-3) 可选：不激活情况下运行命令：
-
-```
-conda run -p ./env python benchmark.py --batch-size 32
-```
-
-4) 删除本地环境：
-
-```
-conda env remove -p ./env
-```
-
-本仓库的 Makefile 已经内置了这些命令的封装：
-
-```
-make env        # 使用 environment.yml 在 ./env 下创建本地环境
-make env-pip    # 仅创建最小环境并用 pip 安装 requirements.txt
-make run        # 使用本地环境运行基准测试（CUDA）
-make run-cpu    # 使用本地环境运行 CPU 基准
-make clean-env  # 删除 ./env
-```
+NLP/language (transformers):
+- `bert_small`, `distilbert_small`, `roberta_small`, `gpt2_small`
 
 ## Usage (CUDA-only)
 
 Basic GPU run:
 
 ```
-python benchmark.py --batch-size 32 --image-size 224 --precision fp32 --repeats 30 --warmup 10 --channels-last
+python benchmark.py --batch-size 32 --image-size 224 --precision fp32 --repeats 30 --warmup 10
 ```
 
-Select subset of models:
+Notes:
+- `--image-size` is used as sequence length for text models.
+- For lower memory usage, try `--batch-size 1` and `--precision fp16`.
 
-```
-python benchmark.py --models resnet50 convnext_tiny
-```
-
-Try mixed-precision (autocast) on CUDA:
+Autocast precision on CUDA:
 
 ```
 python benchmark.py --precision fp16
 python benchmark.py --precision bf16
 ```
 
-Enable TorchScript trace optimization:
+Channel-last memory format (vision models on CUDA):
 
 ```
+python benchmark.py --channels-last
+```
+
+The report will be saved under `./benchmark_results/` with a timestamped filename.
 python benchmark.py --jit
 ```
 

@@ -11,8 +11,8 @@ def write_markdown(
     lines.append(f"# CUDA GPU Deep Learning Benchmark\n")
     lines.append("")
     lines.append(
-        "This report benchmarks 5 representative torchvision models using random input tensors. "
-        "Each model was run multiple times; results below report average latency and throughput.\n"
+        "This report benchmarks representative models (vision/classification, vision/generation, and NLP/language when available) "
+        "using random input tensors. Each model was run multiple times; results below report average latency and throughput.\n"
     )
 
     lines.append("## Environment\n")
@@ -36,18 +36,21 @@ def write_markdown(
     lines.append("```\n")
 
     lines.append("## Results\n")
-    # Table header
+    # Table header (Size/Seq works for both vision and text; throughput shows unit per-row)
     lines.append(
-        "| Model | Batch | Size | Precision | Mean Latency (ms) | P50 (ms) | P90 (ms) | P99 (ms) | Throughput (img/s) | Repeats | Warmup |"
+        "| Model | Batch | Size/Seq | Precision | Mean Latency (ms) | P50 (ms) | P90 (ms) | P99 (ms) | Throughput | Repeats | Warmup |"
     )
     lines.append(
-        "|:------|------:|-----:|:---------:|------------------:|---------:|---------:|---------:|-------------------:|--------:|-------:|"
+        "|:------|------:|------:|:---------:|------------------:|---------:|---------:|---------:|-------------------:|--------:|-------:|"
     )
     for r in results:
+        size_or_seq = r.get('image_size', r.get('seq_len', ''))
+        throughput = r.get('throughput_img_s', r.get('throughput_tok_s', float('nan')))
+        unit = 'img/s' if 'throughput_img_s' in r else ('tok/s' if 'throughput_tok_s' in r else '')
         lines.append(
-            f"| {r['model']} | {r['batch_size']} | {r['image_size']} | {r['precision']} | "
-            f"{r['latency_ms_mean']:.3f} | {r['latency_ms_p50']:.3f} | {r['latency_ms_p90']:.3f} | {r['latency_ms_p99']:.3f} | "
-            f"{r['throughput_img_s']:.2f} | {int(r['repeats'])} | {int(r['warmup'])} |"
+            f"| {r.get('model','')} | {int(r.get('batch_size', 0))} | {size_or_seq} | {r.get('precision','')} | "
+            f"{float(r.get('latency_ms_mean', float('nan'))):.3f} | {float(r.get('latency_ms_p50', float('nan'))):.3f} | {float(r.get('latency_ms_p90', float('nan'))):.3f} | {float(r.get('latency_ms_p99', float('nan'))):.3f} | "
+            f"{float(throughput):.2f} {unit} | {int(r.get('repeats', 0))} | {int(r.get('warmup', 0))} |"
         )
     lines.append("")
 
