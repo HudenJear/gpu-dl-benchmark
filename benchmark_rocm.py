@@ -2,6 +2,7 @@
 import argparse
 import datetime as dt
 import os
+import time
 import platform
 import sys
 from typing import Dict, List, Tuple
@@ -299,6 +300,13 @@ def main():
             throughput = res.get("throughput_img_s", res.get("throughput_tok_s", float("nan")))
             unit = "img/s" if "throughput_img_s" in res else ("tok/s" if "throughput_tok_s" in res else "units/s")
             print(f"{name}: mean {res['latency_ms_mean']:.3f} ms, throughput {throughput:.2f} {unit}")
+            # Give the GPU some time to release memory between tests
+            if device.type == "cuda":
+                try:
+                    torch.cuda.empty_cache()
+                except Exception:
+                    pass
+            time.sleep(1.0)
         except RuntimeError as e:
             print(f"Error benchmarking {name}: {e}")
 

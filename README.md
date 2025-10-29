@@ -97,6 +97,42 @@ Vision/generation (diffusers):
 NLP/language (transformers):
 - `bert_small`, `distilbert_small`, `roberta_small`, `gpt2_small`
 
+## Sample baseline results (by family)
+
+Tables below are organized by task family. Rows are GPUs (currently RTX 3090 24G), and columns are test items (models). Cell values are "mean latency / throughput" with units.
+
+### vision/classification (RTX 3090 24G)
+
+| GPU           | resnet50       | efficientnet_v2_s | convnext_tiny  | swin_v2_t     | vit_b_16      |
+|:--------------|:---------------|:------------------|:---------------|:--------------|:--------------|
+| RTX 3090 24G  | 1511.41 img/s  | 1378.55 img/s     | 1077.61 img/s  | 695.98 img/s  | 430.82 img/s  |
+| A800-SXM4-80GB| 3009.12 img/s  | 2276.26 img/s     | 1304.37 img/s  | 918.06 img/s  | 482.16 img/s  |
+| RTX 5070Ti 16G| 1900.81 img/s  | 1969.90 img/s     | 1481.89 img/s  | 987.44 img/s  | 540.83 img/s  |
+| RTX 5080 16G  | 2212.66 img/s  | 2352.21 img/s     | 1848.15 img/s  | 1195.53 img/s | 680.69 img/s  |
+
+
+### vision/generation (RTX 3090 24G)
+
+| GPU           | gen_unet2d_condition | gen_unet2d     | gen_vae_autoencoderkl |
+|:--------------|:---------------------|:---------------|:----------------------|
+| RTX 3090 24G  | 1571.33 img/s        | 156.64 img/s   | 181.88 img/s          |
+| A800-SXM4-80GB| 2150.32 img/s        | 324.92 img/s   | 402.84 img/s          |
+| RTX 5070Ti 16G| 2185.08 img/s        | 190.43 img/s   | 189.92 img/s          |
+| RTX 5080 16G  | 2470.11 img/s        | 223.57 img/s   | 215.51 img/s          |
+
+
+### nlp/language (RTX 3090 24G)
+
+| GPU           | bert_small     | distilbert_small | roberta_small  | gpt2_small    |
+|:--------------|:---------------|:-----------------|:---------------|:--------------|
+| RTX 3090 24G  | 369.22 k tok/s | 373.86 k tok/s   | 368.85 k tok/s | 186.65 k tok/s |
+| A800-SXM4-80GB| 445.85 k tok/s | 448.62 k tok/s   | 440.94 k tok/s | 216.74 k tok/s |
+| RTX 5070Ti 16G| 540.91 k tok/s | 541.49 k tok/s   | 534.90 k tok/s | 244.90 k tok/s |
+| RTX 5080 16G  | 717.80 k tok/s | 718.50 k tok/s   | 707.00 k tok/s | 312.77 k tok/s |
+
+
+Tip: Append new GPU rows (e.g., RTX 4080, A100 40G, MI250) or extend columns with new models. You can also add columns like `Batch`, `SeqLen`, or `Precision` if you track multiple settings.
+
 ## Usage (CUDA-only)
 
 Basic GPU run:
@@ -114,12 +150,6 @@ Autocast precision on CUDA:
 ```
 python benchmark.py --precision fp16
 python benchmark.py --precision bf16
-```
-
-Channel-last memory format (vision models on CUDA):
-
-```
-python benchmark.py --channels-last
 ```
 
 The report will be saved under `./benchmark_results/` with a timestamped filename.

@@ -1,0 +1,49 @@
+family,gpu,model,throughput,unit
+vision/classification,RTX 3090 24G,resnet50,1511.41,img/s
+vision/classification,RTX 3090 24G,efficientnet_v2_s,1378.55,img/s
+vision/classification,RTX 3090 24G,convnext_tiny,1077.61,img/s
+vision/classification,RTX 3090 24G,swin_v2_t,695.98,img/s
+vision/classification,RTX 3090 24G,vit_b_16,430.82,img/s
+vision/classification,A800-SXM4-80GB,resnet50,3009.12,img/s
+vision/classification,A800-SXM4-80GB,efficientnet_v2_s,2276.26,img/s
+vision/classification,A800-SXM4-80GB,convnext_tiny,1304.37,img/s
+vision/classification,A800-SXM4-80GB,swin_v2_t,918.06,img/s
+vision/classification,A800-SXM4-80GB,vit_b_16,482.16,img/s
+vision/classification,RTX 5070Ti 16G,resnet50,1900.81,img/s
+vision/classification,RTX 5070Ti 16G,efficientnet_v2_s,1969.90,img/s
+vision/classification,RTX 5070Ti 16G,convnext_tiny,1481.89,img/s
+vision/classification,RTX 5070Ti 16G,swin_v2_t,987.44,img/s
+vision/classification,RTX 5070Ti 16G,vit_b_16,540.83,img/s
+vision/classification,RTX 5080 16G,resnet50,2212.66,img/s
+vision/classification,RTX 5080 16G,efficientnet_v2_s,2352.21,img/s
+vision/classification,RTX 5080 16G,convnext_tiny,1848.15,img/s
+vision/classification,RTX 5080 16G,swin_v2_t,1195.53,img/s
+vision/classification,RTX 5080 16G,vit_b_16,680.69,img/s
+vision/generation,RTX 3090 24G,gen_unet2d_condition,1571.33,img/s
+vision/generation,RTX 3090 24G,gen_unet2d,156.64,img/s
+vision/generation,RTX 3090 24G,gen_vae_autoencoderkl,181.88,img/s
+vision/generation,A800-SXM4-80GB,gen_unet2d_condition,2150.32,img/s
+vision/generation,A800-SXM4-80GB,gen_unet2d,324.92,img/s
+vision/generation,A800-SXM4-80GB,gen_vae_autoencoderkl,402.84,img/s
+vision/generation,RTX 5070Ti 16G,gen_unet2d_condition,2185.08,img/s
+vision/generation,RTX 5070Ti 16G,gen_unet2d,190.43,img/s
+vision/generation,RTX 5070Ti 16G,gen_vae_autoencoderkl,189.92,img/s
+vision/generation,RTX 5080 16G,gen_unet2d_condition,2470.11,img/s
+vision/generation,RTX 5080 16G,gen_unet2d,223.57,img/s
+vision/generation,RTX 5080 16G,gen_vae_autoencoderkl,215.51,img/s
+nlp/language,RTX 3090 24G,bert_small,369220.00,tok/s
+nlp/language,RTX 3090 24G,distilbert_small,373860.00,tok/s
+nlp/language,RTX 3090 24G,roberta_small,368850.00,tok/s
+nlp/language,RTX 3090 24G,gpt2_small,186650.00,tok/s
+nlp/language,A800-SXM4-80GB,bert_small,445850.00,tok/s
+nlp/language,A800-SXM4-80GB,distilbert_small,448620.00,tok/s
+nlp/language,A800-SXM4-80GB,roberta_small,440940.00,tok/s
+nlp/language,A800-SXM4-80GB,gpt2_small,216740.00,tok/s
+nlp/language,RTX 5070Ti 16G,bert_small,540910.00,tok/s
+nlp/language,RTX 5070Ti 16G,distilbert_small,541490.00,tok/s
+nlp/language,RTX 5070Ti 16G,roberta_small,534900.00,tok/s
+nlp/language,RTX 5070Ti 16G,gpt2_small,244900.00,tok/s
+nlp/language,RTX 5080 16G,bert_small,717800.00,tok/s
+nlp/language,RTX 5080 16G,distilbert_small,718500.00,tok/s
+nlp/language,RTX 5080 16G,roberta_small,707000.00,tok/s
+nlp/language,RTX 5080 16G,gpt2_small,312770.00,tok/s
